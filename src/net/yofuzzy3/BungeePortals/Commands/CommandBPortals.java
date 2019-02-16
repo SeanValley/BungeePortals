@@ -14,8 +14,14 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
-import com.sk89q.worldedit.bukkit.selections.Selection;
+import com.sk89q.worldedit.IncompleteRegionException;
+import com.sk89q.worldedit.LocalSession;
+import com.sk89q.worldedit.WorldEdit;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldedit.bukkit.BukkitPlayer;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldedit.regions.Region;
 
 public class CommandBPortals implements CommandExecutor {
 
@@ -66,10 +72,19 @@ public class CommandBPortals implements CommandExecutor {
                         if (sender instanceof Player) {
                             Player player = (Player) sender;
                             String playerName = player.getName();
-                            Selection selection = plugin.worldEdit.getSelection(player);
+                            BukkitPlayer bPlayer = BukkitAdapter.adapt(player);
+                            LocalSession session = WorldEdit.getInstance().getSessionManager().get(bPlayer);
+                            
+                            Region selection = null;
+							try {
+								selection = session.getSelection(bPlayer.getWorld());
+							} catch (IncompleteRegionException e) {
+								player.sendMessage(ChatColor.RED + "You have to first create a WorldEdit selection!");
+							}
+							
                             if (selection != null) {
-                                if (selection instanceof CuboidSelection) {
-                                    List<Location> locations = getLocationsFromCuboid((CuboidSelection) selection);
+                                if (selection instanceof CuboidRegion) {
+                                    List<Location> locations = getLocationsFromCuboid((CuboidRegion) selection);
                                     List<String> blocks = new ArrayList<>();
                                     String[] ids = {};
                                     int count = 0;
@@ -84,17 +99,10 @@ public class CommandBPortals implements CommandExecutor {
                                         if (filter) {
                                             boolean found = false;
                                             for (int i = 0; i < ids.length; i++) {
-                                                String[] parts = ids[i].split(":");
-                                                if (parts.length == 2) {
-                                                    if (parts[0].equals(String.valueOf(block.getTypeId())) && parts[1].equals(String.valueOf(block.getData()))) {
-                                                        found = true;
-                                                        break;
-                                                    }
-                                                } else {
-                                                    if (parts[0].equals(String.valueOf(block.getTypeId()))) {
-                                                        found = true;
-                                                        break;
-                                                    }
+                                                String id = ids[i];
+                                                if (id.equalsIgnoreCase(block.getType().toString())) {
+                                                	found = true;
+                                                	break;
                                                 }
                                             }
                                             if (found) {
@@ -166,14 +174,15 @@ public class CommandBPortals implements CommandExecutor {
         return true;
     }
 
-    private List<Location> getLocationsFromCuboid(CuboidSelection cuboid) {
+    private List<Location> getLocationsFromCuboid(CuboidRegion cuboid) {
         List<Location> locations = new ArrayList<>();
-        Location minLocation = cuboid.getMinimumPoint();
-        Location maxLocation = cuboid.getMaximumPoint();
+        BlockVector3 minLocation = cuboid.getMinimumPoint();
+        BlockVector3 maxLocation = cuboid.getMaximumPoint();
         for (int i1 = minLocation.getBlockX(); i1 <= maxLocation.getBlockX(); i1++) {
             for (int i2 = minLocation.getBlockY(); i2 <= maxLocation.getBlockY(); i2++) {
                 for (int i3 = minLocation.getBlockZ(); i3 <= maxLocation.getBlockZ(); i3++) {
-                    locations.add(new Location(cuboid.getWorld(), i1, i2, i3));
+                	String worldName = cuboid.getWorld().getName();
+                    locations.add(new Location(plugin.getServer().getWorld(worldName), i1, i2, i3));
                 }
             }
         }
