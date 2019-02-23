@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 public class EventListener implements Listener {
 
@@ -53,5 +54,14 @@ public class EventListener implements Listener {
             }
         }
     }
+    
+    @EventHandler
+	public void onPlayerQuit(PlayerQuitEvent event) {
+		String playerName = event.getPlayer().getName();
+
+		if (this.statusData.containsKey(playerName)) {
+			this.statusData.remove(playerName);
+		}
+	}
 
 }
