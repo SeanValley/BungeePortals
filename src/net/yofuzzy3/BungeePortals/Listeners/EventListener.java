@@ -6,15 +6,16 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.yofuzzy3.BungeePortals.BungeePortals;
-
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+
+import net.yofuzzy3.BungeePortals.BungeePortals;
 
 public class EventListener implements Listener {
 
@@ -68,6 +69,13 @@ public class EventListener implements Listener {
                 statusData.put(playerName, false);
             }
         }
+    }
+    
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent e) {
+    	if(plugin.getConfig().getBoolean("SpawnTpOnJoin")) {
+    		e.getPlayer().teleport(e.getPlayer().getWorld().getSpawnLocation());
+    	}
     }
     
     @EventHandler

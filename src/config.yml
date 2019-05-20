@@ -3,3 +3,4 @@ SaveTask:
   Enabled: false
   Interval: 600
 NoPortalPermissionMessage: '&cYou do not have permission to go to the server {destination}.'
+SpawnTpOnJoin: false
