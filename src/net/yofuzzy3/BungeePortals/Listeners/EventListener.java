@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.yofuzzy3.BungeePortals.BungeePortals;
+
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -30,6 +32,19 @@ public class EventListener implements Listener {
         if (!statusData.containsKey(playerName)) {
             statusData.put(playerName, false);
         }
+        
+        Location fromLoc = event.getFrom();
+        Location toLoc = event.getTo();
+        
+        if(fromLoc.getBlockX() == toLoc.getBlockX())
+        	return;
+        
+        if(fromLoc.getBlockY() == toLoc.getBlockY())
+        	return;
+        
+        if(fromLoc.getBlockZ() == toLoc.getBlockZ())
+        	return;
+        
         Block block = player.getWorld().getBlockAt(player.getLocation());
         String data = block.getWorld().getName() + "#" + String.valueOf(block.getX()) + "#" + String.valueOf(block.getY()) + "#" + String.valueOf(block.getZ());
         if (plugin.portalData.containsKey(data)) {
