@@ -15,11 +15,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.sk89q.worldedit.bukkit.WorldEditPlugin;
+
 import net.yofuzzy3.BungeePortals.Commands.CommandBPortals;
 import net.yofuzzy3.BungeePortals.Listeners.EventListener;
 import net.yofuzzy3.BungeePortals.Tasks.SaveTask;
-
-import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 
 public class BungeePortals extends JavaPlugin {
 
@@ -37,10 +37,13 @@ public class BungeePortals extends JavaPlugin {
         }
         worldEdit = (WorldEditPlugin) getServer().getPluginManager().getPlugin("WorldEdit");
         startMetrics();
+        
         getCommand("BPortals").setExecutor(new CommandBPortals(this));
         logger.log(Level.INFO, "[BungeePortals] Commands registered!");
+        
         getServer().getPluginManager().registerEvents(new EventListener(this), this);
         logger.log(Level.INFO, "[BungeePortals] Events registered!");
+       
         getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         logger.log(Level.INFO, "[BungeePortals] Plugin channel registered!");
         loadConfigFiles();

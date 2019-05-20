@@ -1,7 +1,8 @@
 package net.yofuzzy3.BungeePortals.Tasks;
 
-import net.yofuzzy3.BungeePortals.BungeePortals;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import net.yofuzzy3.BungeePortals.BungeePortals;
 
 public class SaveTask extends BukkitRunnable {
 
