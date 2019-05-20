@@ -14,12 +14,13 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.LocalSession;
+import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEdit;
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.bukkit.BukkitPlayer;
-import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.bukkit.selections.Selection;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.Region;
 
@@ -72,58 +73,51 @@ public class CommandBPortals implements CommandExecutor {
                         if (sender instanceof Player) {
                             Player player = (Player) sender;
                             String playerName = player.getName();
-                            BukkitPlayer bPlayer = BukkitAdapter.adapt(player);
-                            LocalSession session = WorldEdit.getInstance().getSessionManager().get(bPlayer);
-                            
-                            Region selection = null;
-							try {
-								selection = session.getSelection(bPlayer.getWorld());
-							} catch (IncompleteRegionException e) {
+                            Selection selection = plugin.worldEdit.getSelection(player);
+							
+                            if(selection == null) {
 								player.sendMessage(ChatColor.RED + "You have to first create a WorldEdit selection!");
+								return false;
 							}
 							
-                            if (selection != null) {
-                                if (selection instanceof CuboidRegion) {
-                                    List<Location> locations = getLocationsFromCuboid((CuboidRegion) selection);
-                                    List<String> blocks = new ArrayList<>();
-                                    String[] ids = {};
-                                    int count = 0;
-                                    int filtered = 0;
-                                    boolean filter = false;
-                                    if (!args[1].equals("0")) {
-                                        ids = args[1].split(",");
-                                        filter = true;
-                                    }
-                                    for (Location location : locations) {
-                                        Block block = player.getWorld().getBlockAt(location);
-                                        if (filter) {
-                                            boolean found = false;
-                                            for (int i = 0; i < ids.length; i++) {
-                                                String id = ids[i];
-                                                if (id.equalsIgnoreCase(block.getType().toString())) {
-                                                	found = true;
-                                                	break;
-                                                }
+                            if (selection instanceof CuboidRegion) {
+                                List<Location> locations = getLocationsFromCuboid((CuboidRegion) selection);
+                                List<String> blocks = new ArrayList<>();
+                                String[] ids = {};
+                                int count = 0;
+                                int filtered = 0;
+                                boolean filter = false;
+                                if (!args[1].equals("0")) {
+                                    ids = args[1].split(",");
+                                    filter = true;
+                                }
+                                for (Location location : locations) {
+                                    Block block = player.getWorld().getBlockAt(location);
+                                    if (filter) {
+                                        boolean found = false;
+                                        for (int i = 0; i < ids.length; i++) {
+                                            String id = ids[i];
+                                            if (id.equalsIgnoreCase(block.getType().toString())) {
+                                            	found = true;
+                                            	break;
                                             }
-                                            if (found) {
-                                                blocks.add(block.getWorld().getName() + "#" + String.valueOf(block.getX()) + "#" + String.valueOf(block.getY()) + "#" + String.valueOf(block.getZ()));
-                                                count++;
-                                            } else {
-                                                filtered++;
-                                            }
-                                        } else {
+                                        }
+                                        if (found) {
                                             blocks.add(block.getWorld().getName() + "#" + String.valueOf(block.getX()) + "#" + String.valueOf(block.getY()) + "#" + String.valueOf(block.getZ()));
                                             count++;
+                                        } else {
+                                            filtered++;
                                         }
+                                    } else {
+                                        blocks.add(block.getWorld().getName() + "#" + String.valueOf(block.getX()) + "#" + String.valueOf(block.getY()) + "#" + String.valueOf(block.getZ()));
+                                        count++;
                                     }
-                                    selections.put(playerName, blocks);
-                                    sender.sendMessage(ChatColor.GREEN + String.valueOf(count) + " blocks have been selected, " + String.valueOf(filtered) + " filtered.");
-                                    sender.sendMessage(ChatColor.GREEN + "Use the selection in the create and remove commands.");
-                                } else {
-                                    sender.sendMessage(ChatColor.RED + "Must be a cuboid selection!");
                                 }
+                                selections.put(playerName, blocks);
+                                sender.sendMessage(ChatColor.GREEN + String.valueOf(count) + " blocks have been selected, " + String.valueOf(filtered) + " filtered.");
+                                sender.sendMessage(ChatColor.GREEN + "Use the selection in the create and remove commands.");
                             } else {
-                                sender.sendMessage(ChatColor.RED + "You have to first create a WorldEdit selection!");
+                                sender.sendMessage(ChatColor.RED + "Must be a cuboid selection!");
                             }
                         } else {
                             sender.sendMessage(ChatColor.RED + "Only players can use that command.");
@@ -176,8 +170,8 @@ public class CommandBPortals implements CommandExecutor {
 
     private List<Location> getLocationsFromCuboid(CuboidRegion cuboid) {
         List<Location> locations = new ArrayList<>();
-        BlockVector3 minLocation = cuboid.getMinimumPoint();
-        BlockVector3 maxLocation = cuboid.getMaximumPoint();
+        Vector minLocation = cuboid.getMinimumPoint();
+        Vector maxLocation = cuboid.getMaximumPoint();
         for (int i1 = minLocation.getBlockX(); i1 <= maxLocation.getBlockX(); i1++) {
             for (int i2 = minLocation.getBlockY(); i2 <= maxLocation.getBlockY(); i2++) {
                 for (int i3 = minLocation.getBlockZ(); i3 <= maxLocation.getBlockZ(); i3++) {
